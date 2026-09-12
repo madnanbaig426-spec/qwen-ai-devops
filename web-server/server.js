@@ -2,7 +2,7 @@ const express = require("express");
 
 const app = express();
 const PORT = 3000;
-const AI_SERVER_URL = "http://localhost:8000";
+const AI_SERVER_URL = "http://ai-server:8000";
 
 app.use(express.json());
 

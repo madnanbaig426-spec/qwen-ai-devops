@@ -1,0 +1,25 @@
+services:
+
+  ai-server:
+    build:
+      context: ./ai-server
+    container_name: qwen-ai-server
+    ports:
+      - "8000:8000"
+    networks:
+      - qwen-network
+
+  web-server:
+    build:
+      context: ./web-server
+    container_name: qwen-web-server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ai-server
+    networks:
+      - qwen-network
+
+networks:
+  qwen-network:
+    driver: bridge
