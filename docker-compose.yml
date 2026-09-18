@@ -5,7 +5,9 @@ services:
       context: ./ai-server
     container_name: qwen-ai-server
     ports:
-      - "8000:8000"
+      - "8000:8000"      
+    volumes:
+      - ./ai-server/models:/app/models:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
