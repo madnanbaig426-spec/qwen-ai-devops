@@ -10,14 +10,14 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.14"
 
@@ -32,16 +32,39 @@ jobs:
         run: |
           python -m py_compile ai-server/ai_server.py
 
-      - name: Validate Docker Compo
-        run: |
-          docker compose config
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: |
+            frontend/package-lock.json
+            web-server/package-lock.json
 
-      - name: Build Web Server image
-        run: |
-          docker build -t qwen-web-server:ci ./web-server
+      - name: Install Frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
-      - name: Build AI Server image
-        run: |
-          docker build -t qwen-ai-server:ci ./ai-server
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
 
+      - name: Install Web Server dependencies
+        working-directory: web-server
+        run: npm ci
 
+      - name: Validate Web Server
+        working-directory: web-server
+        run: node --check server.js
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Build Frontend Docker image
+        run: docker build -t qwen-frontend:ci ./frontend
+
+      - name: Build Web Server Docker image
+        run: docker build -t qwen-web-server:ci ./web-server
+
+      - name: Build AI Server Docker image
+        run: docker build -t qwen-ai-server:ci ./ai-server
