@@ -32,7 +32,7 @@ jobs:
         run: |
           python -m py_compile ai-server/ai_server.py
 
-      - name: Validate Docker Compose
+      - name: Validate Docker Compo
         run: |
           docker compose config
 
@@ -43,3 +43,5 @@ jobs:
       - name: Build AI Server image
         run: |
           docker build -t qwen-ai-server:ci ./ai-server
+
+

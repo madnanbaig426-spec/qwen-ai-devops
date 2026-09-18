@@ -5,18 +5,25 @@ services:
       context: ./ai-server
     container_name: qwen-ai-server
     ports:
-      - "8000:8000"      
+      - "8000:8000"
     volumes:
       - ./ai-server/models:/app/models:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
     networks:
       - qwen-network
+
 
   web-server:
     build:
@@ -28,7 +35,13 @@ services:
       AI_SERVER_URL: http://ai-server:8000
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,6 +50,35 @@ services:
       - ai-server
     networks:
       - qwen-network
+
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: qwen-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      WEB_SERVER_URL: http://web-server:3000
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:3000"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - web-server
+    networks:
+      - qwen-network
+
 
 networks:
   qwen-network:
